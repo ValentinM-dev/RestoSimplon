@@ -5,6 +5,10 @@ namespace RestoSimplon.Class
     public class RestoSimplonDB : DbContext
     {
         public DbSet<Client> Clients { get; set; }
+        public DbSet<Command> Commands { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Categorie> Categories { get; set; }
+        public DbSet<ListArticles> ListArticles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -14,17 +18,20 @@ namespace RestoSimplon.Class
 
             // Création de la table Commande
             modelBuilder.Entity<Command>()
-                .HasOne<Client>()
-                .WithMany()
-                .HasForeignKey(c => c.ClientId); // Relation avec Client
+                .HasMany(c => c.Articles)
+                .WithMany(c => c.Commands)
+                .UsingEntity<ListArticles>();
 
 
 
             //Création de la table Article
             modelBuilder.Entity<Article>()
-                        .HasOne<Categorie>()
-                        .WithOne()
-                        .HasForeignKey(a => a.CategorieId);
+                        .HasOne<Categorie>() // Relation avec Categorie
+                        .WithMany()
+                        .HasForeignKey(a => a.CategorieId); // Clé Etrangère CategorieId
+                        
+
+
         }
     }
 }

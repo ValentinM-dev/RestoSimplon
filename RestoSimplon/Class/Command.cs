@@ -6,7 +6,7 @@
         public required int ClientId { get; set; }
         public required int MontantCommande { get; set; }
         public required DateTime DateCommand { get; set; }
-        public required string ArticleList { get; set; }
+        public List<Article> Articles { get; } = [];
         public required int NbArticle { get; set; }
     }
 
@@ -16,7 +16,7 @@
         public required int ClientId { get; set; }
         public required int MontantCommande { get; set; }
         public required DateTime DateCommand { get; set; }
-        public required string ArticleList { get; set; }
+        public List<Article> Articles { get; } = [];
         public required int NbArticle { get; set; }
 
 
@@ -28,7 +28,7 @@
             ClientId = commande.ClientId;
             MontantCommande = commande.MontantCommande;
             DateCommand = commande.DateCommand;
-            ArticleList = commande.ArticleList;
+            Articles = commande.Articles;
             NbArticle = commande.NbArticle;
         }
     }
