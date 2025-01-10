@@ -37,7 +37,7 @@ if(app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "RestoSimplon API V0.1");
+        c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "RestoSimplon API V0.1");
         c.RoutePrefix = "";
     });
 }
@@ -47,12 +47,12 @@ RouteGroupBuilder restoSimplon = app.MapGroup("restoSimplon");
 restoSimplon.MapGet("/", GetAllArticle); 
 restoSimplon.MapGet("/categorie", GetCategorie); 
 restoSimplon.MapGet("/command", GetCommand);
-restoSimplon.MapGet("/{id}", GetClient);
+restoSimplon.MapGet("/client/{id}", GetClient);
 restoSimplon.MapPost("/", CreateClient);
 restoSimplon.MapPost("/command", CreateCommand);
 restoSimplon.MapPut("/{id}", UpdateClient);
-restoSimplon.MapDelete("/{id}", DeleteClient);
-restoSimplon.MapDelete("/{id}", DeleteCommand);
+restoSimplon.MapDelete("/client/{id}", DeleteClient);
+restoSimplon.MapDelete("/command/{id}", DeleteCommand);
 
 app.Run();
 
