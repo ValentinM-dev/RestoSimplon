@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public required string NameArticle { get; set; }
         public required int CategorieId { get; set; }
-        public required float PrixArticle { get; set; }
+        public required double PrixArticle { get; set; }
         public required bool Status { get; set; }
         public List<Command> Commands { get; } = [];
     }
@@ -15,7 +15,7 @@
         public int Id { get; set; }
         public required string NameArticle { get; set; }
         public required int CategorieId { get; set; }
-        public required float PrixArticle { get; set; }
+        public required double PrixArticle { get; set; }
         public required bool Status { get; set; }
         public List<Command> Commands { get; } = [];
 

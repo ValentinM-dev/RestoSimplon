@@ -26,14 +26,6 @@ namespace RestoSimplon.Class
                 .HasMany(c => c.Articles)
                 .WithMany(c => c.Commands)
                 .UsingEntity<ListArticles>();
-
-
-
-            //Création de la table Article
-            modelBuilder.Entity<Article>()
-                        .HasOne<Categorie>() // Relation avec Categorie
-                        .WithMany()
-                        .HasForeignKey(a => a.CategorieId); // Clé Etrangère CategorieId
                         
 
 

@@ -45,6 +45,13 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+//Ajouter les données des articles dans la base de données
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<RestoSimplonDB>();
+    DbInitializer.Seed(dbContext);
+}
+
 RouteGroupBuilder restoSimplon = app.MapGroup("restoSimplon");
 
 restoSimplon.MapGet("/", GetAllArticle)
@@ -102,6 +109,8 @@ restoSimplon.MapDelete("/command/{id}", DeleteCommand)
         description: "Retire toute les informations d'une commande par son ID"))
     .WithMetadata(new SwaggerResponseAttribute(200, "Votre commande a été retiré avec succès"))
     .WithMetadata(new SwaggerResponseAttribute(404, "La commande n'a pas pu être retirer"));
+
+
 
 app.Run();
 
@@ -180,9 +189,3 @@ static async Task<IResult> DeleteCommand(int id, RestoSimplonDB db)
     return TypedResults.NotFound();
 }
 
-//Ajouter les données des articles dans la base de données
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<RestoSimplonDB>();
-    DbInitializer.Seed(dbContext);
-}
