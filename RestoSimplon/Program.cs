@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using System.Data;
 using Microsoft.VisualBasic;
 using System.Text.Json;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RestoSimplonDB>(opt => opt.UseSqlite("Data Source=RestoSimplon.db"));
@@ -186,8 +187,9 @@ string jsonContent = File.ReadAllText(jsonFilePath);
 List<Article> articles = JsonSerializer.Deserialize<List<Article>>(jsonContent);
 
 //Ajouter les données des articles dans la base de données
-using (RestoSimplonDB context = new RestoSimplonDB(new DbContextOptionsBuilder<RestoSimplonDB>().UseSqlite("Data Source=RestoSimlplon.db").Options))
+// Ajoute des données de test à la base de données
+using (var scope = app.Services.CreateScope())
 {
-    context.Articles.AddRange(articles);
-    context.SaveChanges();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbInitializer.Seed(dbContext);
 }
