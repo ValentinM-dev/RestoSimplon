@@ -1,4 +1,6 @@
-﻿namespace RestoSimplon.Class
+﻿using Swashbuckle.AspNetCore.Annotations;
+
+namespace RestoSimplon.Class
 {
     public class Categorie
     {
@@ -8,7 +10,10 @@
 
     public class CategorieDTO
     {
+        [SwaggerSchema("Identifiant unique de l'article")]
         public int Id { get; set; }
+
+        [SwaggerSchema("Nom de la catégorie")]
         public required string Name { get; set; }
 
         public CategorieDTO() { }

@@ -1,4 +1,6 @@
-﻿namespace RestoSimplon.Class
+﻿using Swashbuckle.AspNetCore.Annotations;
+
+namespace RestoSimplon.Class
 {
     public class ListArticles
     {
@@ -8,7 +10,10 @@
 
     public class ListArticlesDTO
     {
+        [SwaggerSchema("Récupération de l'ID de l'article")]
         public required int ArticleId { get; set; }
+
+        [SwaggerSchema("Récupération de l'ID de la commande")]
         public required int CommandId { get; set; }
 
         public ListArticlesDTO() { }

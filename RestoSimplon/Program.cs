@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using System.Data;
 using Microsoft.VisualBasic;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RestoSimplonDB>(opt => opt.UseSqlite("Data Source=RestoSimplon.db"));
@@ -32,7 +33,7 @@ builder.Services.AddSwaggerGen(c =>
 
 
 var app = builder.Build();
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -44,20 +45,66 @@ if(app.Environment.IsDevelopment())
 
 RouteGroupBuilder restoSimplon = app.MapGroup("restoSimplon");
 
-restoSimplon.MapGet("/", GetAllArticle); 
-restoSimplon.MapGet("/categorie", GetCategorie); 
-restoSimplon.MapGet("/command", GetCommand);
-restoSimplon.MapGet("/client/{id}", GetClient);
-restoSimplon.MapPost("/", CreateClient);
-restoSimplon.MapPost("/command", CreateCommand);
-restoSimplon.MapPut("/{id}", UpdateClient);
-restoSimplon.MapDelete("/client/{id}", DeleteClient);
-restoSimplon.MapDelete("/command/{id}", DeleteCommand);
+restoSimplon.MapGet("/", GetAllArticle)
+    .WithMetadata(new SwaggerOperationAttribute(
+         summary: "Récupère tous les éléments Articles",
+         description: "Renvoie une liste de tous les éléments Articles"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Voici la liste des Articles"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Aucun élément Articles a pu être trouver"));
+
+restoSimplon.MapGet("/categorie", GetCategorie)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Récupère un élément Categorie par son ID",
+        description: "Renvoie un/des éléments Articles par l'ID de la Categorie"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Voici la liste des articles en fonction de l'ID de la Categorie"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Aucun élément n'a pu être trouver avec cette ID"));
+restoSimplon.MapGet("/command", GetCommand)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Récupère un élément Categorie par son ID",
+        description: "Renvoie un/des éléments Articles par l'ID de la Categorie"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Voici la liste des articles en fonction de l'ID de la Categorie"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Aucun élément n'a pu être trouver avec cette ID"));
+restoSimplon.MapGet("/client/{id}", GetClient)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Récupère un élément Client par son ID",
+        description: "Renvoie un élément Client par l'ID du client"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Voici les informations du clients choisis"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Aucun élément n'a pu être trouver avec cette ID"));
+restoSimplon.MapPost("/", CreateClient)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Crée un élément Client",
+        description: "Crée un élément Client en suivant les informations données"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Votre client a était crée avec succès"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Des éléments sont manquant ou le client est déjà présent"));
+restoSimplon.MapPost("/command", CreateCommand)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Crée un élément Command",
+        description: "Crée un élément Command en suivant les informations données"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Votre commande a était crée avec succès"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Des éléments sont manquant ou la commande est déjà en cours"));
+restoSimplon.MapPut("/{id}", UpdateClient)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Met à jour un client par son ID",
+        description: "Renvoie une modification par l'ID du client"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "La modification a était effecuté avec succès"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "La modification n'a pas pu être possible"));
+restoSimplon.MapDelete("/client/{id}", DeleteClient)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Supprime un client par son ID",
+        description: "Retire toute les informations d'un client par son ID"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Votre client a été retiré avec succès"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "Le client n'a pas pu être retirer"));
+restoSimplon.MapDelete("/command/{id}", DeleteCommand)
+    .WithMetadata(new SwaggerOperationAttribute(
+        summary: "Supprime une commande par son ID",
+        description: "Retire toute les informations d'une commande par son ID"))
+    .WithMetadata(new SwaggerResponseAttribute(200, "Votre commande a été retiré avec succès"))
+    .WithMetadata(new SwaggerResponseAttribute(404, "La commande n'a pas pu être retirer"));
 
 app.Run();
 
 static async Task<IResult> GetAllArticle(RestoSimplonDB db) => TypedResults.Ok(await db.Articles.ToArrayAsync());
-static async Task<IResult> GetCategorie(int id,  RestoSimplonDB db)
+static async Task<IResult> GetCategorie(int id, RestoSimplonDB db)
 {
     return await db.Categories.FindAsync(id)
         is Categorie Id
@@ -95,7 +142,7 @@ static async Task<IResult> CreateCommand(Command Id, RestoSimplonDB db)
     return TypedResults.Created($"/command/{Id.Id}", Id);
 }
 
-static async Task<IResult> UpdateClient( int id, Client client, RestoSimplonDB db)
+static async Task<IResult> UpdateClient(int id, Client client, RestoSimplonDB db)
 {
     var Id = await db.Clients.FindAsync(id);
 
@@ -109,7 +156,7 @@ static async Task<IResult> UpdateClient( int id, Client client, RestoSimplonDB d
 
 static async Task<IResult> DeleteClient(int id, RestoSimplonDB db)
 {
-    if(await db.Clients.FindAsync(id) is Client Id)
+    if (await db.Clients.FindAsync(id) is Client Id)
     {
         db.Clients.Remove(Id);
         await db.SaveChangesAsync();
@@ -129,4 +176,18 @@ static async Task<IResult> DeleteCommand(int id, RestoSimplonDB db)
     }
 
     return TypedResults.NotFound();
+}
+
+//Lire le fichier JSON
+string jsonFilePath = "articles.json";
+string jsonContent = File.ReadAllText(jsonFilePath);
+
+//Désérialiser le JSON en Liste D'articles
+List<Article> articles = JsonSerializer.Deserialize<List<Article>>(jsonContent);
+
+//Ajouter les données des articles dans la base de données
+using (RestoSimplonDB context = new RestoSimplonDB(new DbContextOptionsBuilder<RestoSimplonDB>().UseSqlite("Data Source=RestoSimlplon.db").Options))
+{
+    context.Articles.AddRange(articles);
+    context.SaveChanges();
 }
