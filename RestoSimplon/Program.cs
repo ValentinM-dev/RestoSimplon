@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.Run();
+
 
 RouteGroupBuilder RestoSimplon = app.MapGroup("/restoSimplon");
 app.Run();
@@ -50,12 +50,13 @@ RestoSimplon.MapPut("/command/{id}", UpdateCommand); // Route pour la mise à jou
 RestoSimplon.MapDelete("/command/{id}", DeleteCommand); // Route pour supprimer une commande
 
 
-
+// Routes clients:
 RestoSimplon.MapGet("/", GetClient);
 RestoSimplon.MapGet("/", GetCategorie);
 RestoSimplon.MapPost("/", CreateClient);
 RestoSimplon.MapPut("/", UpdateClient);
 RestoSimplon.MapDelete("/", DeleteClient);
+
 
 
 
@@ -125,7 +126,7 @@ static async Task<IResult> DeleteArticle(int id, RestoSimplonDb db)
 
 
 
-// Méthode de gestion des routes pour commande
+// Méthodes de gestion des routes pour commande
 
 static async Task<IResult> GetAllCommands(RestoSimplonDb db)
 {
@@ -227,7 +228,7 @@ static async Task<IResult> GetCommandsByDate(DateTime date, RestoSimplonDb db)
 
 
 
-
+// Methode de getion des routes clients
 
 static async Task<IResult> GetClient(int id, RestoSimplonDb db)
 {
