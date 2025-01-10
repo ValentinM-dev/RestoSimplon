@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
 using RestoSimplon.Class;
+using System.Net;
 
-//var builder = WebApplication.CreateBuilder(args);
-//builder.Services.AddDbContext<RestoSimplonDb>(opt => opt.UseSqlServer("RestoSimplonDb"));
+
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<RestoSimplonDb>(opt => opt.UseSqlServer("RestoSimplonDb"));
 
 // Ajouter le service Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -21,33 +24,39 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(); // Active l'interface utilisateur de Swagger
 }
 
-
+app.UseHttpsRedirection();
 app.Run();
 
+RouteGroupBuilder RestoSimplon = app.MapGroup("/restoSimplon");
+app.Run();
 
-var restoSimplon = app.MapGroup("/restoSimplon");
+//var restoSimplon = app.MapGroup("/restoSimplon");
 
 
 // Routes  articles:
-restoSimplon.MapGet("/articles", GetAllArticle);  // Route pour obtenir tous les  articles
-restoSimplon.MapGet("/article/{id}", GetArticle); // Route pour obtenir l'article par son id
-restoSimplon.MapPost("/articles", CreateArticle);  // Route pour la création d'un article
-restoSimplon.MapPut("/article/{id}", UpdateArticle); // Route pour la mise à jour d'un article
-restoSimplon.MapDelete("/article/{id}", DeleteArticle); // Route pour supprimer un article
+RestoSimplon.MapGet("/articles", GetAllArticle);  // Route pour obtenir tous les  articles
+RestoSimplon.MapGet("/article/{id}", GetArticle); // Route pour obtenir l'article par son id
+RestoSimplon.MapPost("/articles", CreateArticle);  // Route pour la création d'un article
+RestoSimplon.MapPut("/article/{id}", UpdateArticle); // Route pour la mise à jour d'un article
+RestoSimplon.MapDelete("/article/{id}", DeleteArticle); // Route pour supprimer un article
 
 
 // Routes  commandes:
-restoSimplon.MapGet("/commands", GetAllCommands); // Route pour obtenir toute les  commandes
-restoSimplon.MapGet("/command/{id}", GetCommand); // Route pour la commande par son id 
-restoSimplon.MapGet("/commands/bydate/{date}", GetCommandsByDate); //Route pour obtenir les commandes par date
-restoSimplon.MapPost("/commands", CreateCommand); // Route pour la création d'une commande
-restoSimplon.MapPut("/command/{id}", UpdateCommand); // Route pour la mise à jour d'une commande
-restoSimplon.MapDelete("/command/{id}", DeleteCommand); // Route pour supprimer une commande
+RestoSimplon.MapGet("/commands", GetAllCommands); // Route pour obtenir toute les  commandes
+RestoSimplon.MapGet("/command/{id}", GetCommand); // Route pour la commande par son id 
+RestoSimplon.MapGet("/commands/bydate/{date}", GetCommandsByDate); //Route pour obtenir les commandes par date
+RestoSimplon.MapPost("/commands", CreateCommand); // Route pour la création d'une commande
+RestoSimplon.MapPut("/command/{id}", UpdateCommand); // Route pour la mise à jour d'une commande
+RestoSimplon.MapDelete("/command/{id}", DeleteCommand); // Route pour supprimer une commande
 
 
 
+RestoSimplon.MapGet("/", GetClient);
+RestoSimplon.MapGet("/", GetCategorie);
+RestoSimplon.MapPost("/", CreateClient);
+RestoSimplon.MapPut("/", UpdateClient);
+RestoSimplon.MapDelete("/", DeleteClient);
 
-app.Run();
 
 
 
@@ -220,3 +229,56 @@ static async Task<IResult> GetCommandsByDate(DateTime date, RestoSimplonDb db)
 
 
 
+static async Task<IResult> GetClient(int id, RestoSimplonDb db)
+{
+    return await db.Client.FindAsync(id)
+        is Client Id
+        ? TypedResults.Ok(id)
+        : TypedResults.NotFound();
+}
+static async Task<IResult> GetCategorie(int id, RestoSimplonDb db)
+{
+    return await db.Categorie.FindAsync(id)
+        is Categorie Id
+        ? TypedResults.Ok(id)
+        : TypedResults.NotFound();
+}
+
+static async Task<IResult> CreateClient(Client client, RestoSimplonDb db)
+{
+    db.Client.Add(client);
+    await db.SaveChangesAsync();
+
+
+
+    return TypedResults.Created($"/client/{client.Id}");
+
+}
+
+
+
+static async Task<IResult> UpdateClient(int id, ClientDTO client, RestoSimplonDb db)
+{
+    var clientDb = await db.Client.FindAsync(id);
+    if (clientDb is null) return TypedResults.NotFound();
+
+    clientDb.Name = client.Name;
+    clientDb.Prenom = client.Prenom;
+    clientDb.Adress = client.Adress;
+    clientDb.PhoneNumber = client.PhoneNumber;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.NoContent();
+}
+
+static async Task<IResult> DeleteClient(int id, RestoSimplon db)
+{
+    if (await db.Client.FindAsync(id) is Client client)
+    {
+        db.Client.Remove(client);
+        await db.SaveChangesAsync();
+        return TypedResults.NoContent();
+    }
+    return TypedResults.NotFound();
+}
