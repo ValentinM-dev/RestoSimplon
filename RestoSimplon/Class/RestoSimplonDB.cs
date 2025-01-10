@@ -4,6 +4,11 @@ namespace RestoSimplon.Class
 {
     public class RestoSimplonDB : DbContext
     {
+        public RestoSimplonDB(DbContextOptions<RestoSimplonDB> options)
+        : base(options)
+        {
+
+        }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Command> Commands { get; set; }
         public DbSet<Article> Articles { get; set; }

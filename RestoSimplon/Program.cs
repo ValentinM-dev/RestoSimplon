@@ -9,6 +9,7 @@ using System.Data;
 using Microsoft.VisualBasic;
 using System.Text.Json;
 using System;
+using Microsoft.EntityFrameworkCore.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<RestoSimplonDB>(opt => opt.UseSqlite("Data Source=RestoSimplon.db"));
@@ -179,16 +180,9 @@ static async Task<IResult> DeleteCommand(int id, RestoSimplonDB db)
     return TypedResults.NotFound();
 }
 
-//Lire le fichier JSON
-string jsonFilePath = "articles.json";
-string jsonContent = File.ReadAllText(jsonFilePath);
-
-//Désérialiser le JSON en Liste D'articles
-List<Article> articles = JsonSerializer.Deserialize<List<Article>>(jsonContent);
-
 //Ajouter les données des articles dans la base de données
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<RestoSimplonDB>();
-    .Seed(dbContext);
+    DbInitializer.Seed(dbContext);
 }
