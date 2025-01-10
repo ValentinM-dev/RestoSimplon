@@ -1,32 +1,46 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
-using RestoSimplon.Class;
-using System.Net;
-
-
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<RestoSimplonDb>(opt => opt.UseSqlServer("RestoSimplonDb"));
-
-// Ajouter le service Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v0.1", new OpenApiInfo
+    {
+        Title = "RestoSimplon Api",
+        Version = "v0.1",
+        Description = "Version 0.1 de l'API pour gerer des Commandes, Articles et Clients",
+        Contact = new OpenApiContact
+        {
+            Name = "Valentin, Bafod√© et Lisa",
+            Email = "RestoSimplon@exercice.com",
+            Url = new Uri("https://RestoSimpon.com"),
+        }
+    });
+
+    // Annotations Swagger
+    c.EnableAnnotations();
+});
+
 
 var app = builder.Build();
-
-// Configurer Swagger pour qu'il soit utilisÈ dans l'application
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); // Active Swagger
-    app.UseSwaggerUI(); // Active l'interface utilisateur de Swagger
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "RestoSimplon API V0.1");
+        c.RoutePrefix = "";
+    });
 }
 
-app.UseHttpsRedirection();
-
-
+//Ajouter les donn√©es des articles dans la base de donn√©es
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<RestoSimplonDB>();
+    DbInitializer.Seed(dbContext);
+}
 RouteGroupBuilder RestoSimplon = app.MapGroup("/restoSimplon");
 app.Run();
 
@@ -36,8 +50,8 @@ app.Run();
 // Routes  articles:
 RestoSimplon.MapGet("/articles", GetAllArticle);  // Route pour obtenir tous les  articles
 RestoSimplon.MapGet("/article/{id}", GetArticle); // Route pour obtenir l'article par son id
-RestoSimplon.MapPost("/articles", CreateArticle);  // Route pour la crÈation d'un article
-RestoSimplon.MapPut("/article/{id}", UpdateArticle); // Route pour la mise ‡ jour d'un article
+RestoSimplon.MapPost("/articles", CreateArticle);  // Route pour la cr√©ation d'un article
+RestoSimplon.MapPut("/article/{id}", UpdateArticle); // Route pour la mise √† jour d'un article
 RestoSimplon.MapDelete("/article/{id}", DeleteArticle); // Route pour supprimer un article
 
 
@@ -45,8 +59,8 @@ RestoSimplon.MapDelete("/article/{id}", DeleteArticle); // Route pour supprimer 
 RestoSimplon.MapGet("/commands", GetAllCommands); // Route pour obtenir toute les  commandes
 RestoSimplon.MapGet("/command/{id}", GetCommand); // Route pour la commande par son id 
 RestoSimplon.MapGet("/commands/bydate/{date}", GetCommandsByDate); //Route pour obtenir les commandes par date
-RestoSimplon.MapPost("/commands", CreateCommand); // Route pour la crÈation d'une commande
-RestoSimplon.MapPut("/command/{id}", UpdateCommand); // Route pour la mise ‡ jour d'une commande
+RestoSimplon.MapPost("/commands", CreateCommand); // Route pour la cr√©ation d'une commande
+RestoSimplon.MapPut("/command/{id}", UpdateCommand); // Route pour la mise √† jour d'une commande
 RestoSimplon.MapDelete("/command/{id}", DeleteCommand); // Route pour supprimer une commande
 
 
@@ -61,11 +75,11 @@ RestoSimplon.MapDelete("/", DeleteClient);
 
 
 
-// MÈthodes de gestion des routes articles 
+// M√©thodes de gestion des routes articles 
 
 static async Task<IResult> GetAllArticle(RestoSimplonDb db)
 {
-    var articles = await db.Articles.ToListAsync();  // la variable articles pour effectuer le requete a la bdd et recupÈrer les articles
+    var articles = await db.Articles.ToListAsync();  // la variable articles pour effectuer le requete a la bdd et recup√©rer les articles
     var articlesDTOs = articles.Select(article => new ArticleDTO(article)).ToList();
     return TypedResults.Ok(articlesDTOs);
 }
@@ -82,7 +96,7 @@ static async Task<IResult> CreateArticle(ArticleDTO articleDTO, RestoSimplonDb d
 {
     var article = new Article
     {
-        NameArticle = articleDTO.NameArticle,  // mise a jour des proprÈtÈs de l'article 
+        NameArticle = articleDTO.NameArticle,  // mise a jour des propr√©t√©s de l'article 
         CategorieId = articleDTO.CategorieId,
         PrixArticle = articleDTO.PrixArticle,
         Status = articleDTO.Status
@@ -126,7 +140,7 @@ static async Task<IResult> DeleteArticle(int id, RestoSimplonDb db)
 
 
 
-// MÈthodes de gestion des routes pour commande
+// M√©thodes de gestion des routes pour commande
 
 static async Task<IResult> GetAllCommands(RestoSimplonDb db)
 {
@@ -183,14 +197,14 @@ static async Task<IResult> UpdateCommand(int id, CommandDTO commandDTO, RestoSim
         return TypedResults.NotFound();
 
     var articles = await db.Articles
-        .Where(article => commandDTO.ArticleList.Contains(article.Id.ToString()))    // RÈcupÈrer les articles mis ‡ jour
+        .Where(article => commandDTO.ArticleList.Contains(article.Id.ToString()))    // R√©cup√©rer les articles mis √† jour
         .ToListAsync();
 
   //command.Id = commandDTO.Id;
     command.ClientId = commandDTO.ClientId;
     command.DateCommand = commandDTO.DateCommand;
     command.MontantCommande = commandDTO.MontantCommande;
-    command.ArticleList = articles; // Mettre ‡ jour la liste des articles
+    command.ArticleList = articles; // Mettre √† jour la liste des articles
     command.NbArticle = commandDTO.NbArticle;
 
     await db.SaveChangesAsync();
@@ -219,7 +233,7 @@ static async Task<IResult> GetCommandsByDate(DateTime date, RestoSimplonDb db)
         .Where(c => c.DateCommand.Date == date.Date)  // trie des commandes par date
         .ToListAsync();
 
-    var commandsDTOs = commands.Select(command => new CommandDTO(command)).ToList(); // genËre la liste de commandes a la date voulue
+    var commandsDTOs = commands.Select(command => new CommandDTO(command)).ToList(); // gen√®re la liste de commandes a la date voulue
 
     return commandsDTOs.Any()
         ? TypedResults.Ok(commandsDTOs)
